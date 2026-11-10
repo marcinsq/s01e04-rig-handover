@@ -28,13 +28,20 @@ export function createApp(config: RigConfig = loadConfig()) {
     return c.json(digest);
   });
 
-  app.get('/', (c) =>
-    c.html(
+  app.get('/', async (c) => {
+    const status = readStatus(config);
+    const nights = await Promise.all(
+      status.nights.map(async (night) => ({
+        night,
+        counts: (await readNight(config.runsDir, night))?.counts ?? null,
+      })),
+    );
+    return c.html(
       <Layout title="status" lane={lane()}>
-        <StatusBoard status={readStatus(config)} />
+        <StatusBoard status={status} nights={nights} />
       </Layout>,
-    ),
-  );
+    );
+  });
 
   return app;
 }

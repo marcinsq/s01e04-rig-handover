@@ -22,6 +22,12 @@ export function createApp(config: RigConfig = loadConfig()) {
     );
   });
 
+  app.get('/api/digest/:night', async (c) => {
+    const digest = await readNight(config.runsDir, c.req.param('night'));
+    if (digest === null) return c.json({ error: 'not found' }, 404);
+    return c.json(digest);
+  });
+
   app.get('/', (c) =>
     c.html(
       <Layout title="status" lane={lane()}>
